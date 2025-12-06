@@ -18,68 +18,92 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         this.connectionManager = cm;
         this.username = username;
 
-        // Listener harus aktif sebelum UI
         cm.setMessageListener(this);
 
         initUI();
     }
 
     private void initUI() {
-        setTitle("Lobby - " + username);
+        setTitle("Tic-Tac-Toe Lobby - " + username);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(900, 600);
+        setSize(1000, 650);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // LEFT PANEL - user list + buttons
-        JScrollPane userScroll = new JScrollPane(userList);
-        userScroll.setPreferredSize(new Dimension(200, 0));
-
-        JButton inviteButton = new JButton("Invite");
-        inviteButton.addActionListener(e -> inviteSelectedUser());
-
-        JButton quitButton = new JButton("Quit");
-        quitButton.addActionListener(e -> logout());
-
-        JPanel bottomButtons = new JPanel(new GridLayout(1, 2, 6, 6));
-        bottomButtons.add(inviteButton);
-        bottomButtons.add(quitButton);
-
+        // ===== LEFT PANEL =====
         JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setPreferredSize(new Dimension(250, 0));
+
+        JLabel onlineLabel = new JLabel("Online Users", SwingConstants.CENTER);
+        onlineLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        onlineLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JScrollPane userScroll = new JScrollPane(userList);
+
+        JButton inviteBtn = new JButton("Invite to Play");
+        inviteBtn.addActionListener(e -> inviteSelectedUser());
+
+        JButton quitBtn = new JButton("Quit");
+        quitBtn.addActionListener(e -> logout());
+
+        JPanel bottomButtons = new JPanel(new GridLayout(2, 1, 6, 6));
+        bottomButtons.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        bottomButtons.add(inviteBtn);
+        bottomButtons.add(quitBtn);
+
+        leftPanel.add(onlineLabel, BorderLayout.NORTH);
         leftPanel.add(userScroll, BorderLayout.CENTER);
         leftPanel.add(bottomButtons, BorderLayout.SOUTH);
 
-        // CHAT AREA
+        // ===== RIGHT PANEL =====
+        JPanel rightPanel = new JPanel(new BorderLayout());
+
+        JLabel chatLabel = new JLabel("Global Chat", SwingConstants.CENTER);
+        chatLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        chatLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
         chatArea.setEditable(false);
         JScrollPane chatScroll = new JScrollPane(chatArea);
 
         chatInput.addActionListener(e -> sendChat());
+        JButton sendBtn = new JButton("Send");
+        sendBtn.addActionListener(e -> sendChat());
 
-        JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.add(chatScroll, BorderLayout.CENTER);
-        chatPanel.add(chatInput, BorderLayout.SOUTH);
+        JPanel inputPanel = new JPanel(new BorderLayout(6, 0));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        inputPanel.add(chatInput, BorderLayout.CENTER);
+        inputPanel.add(sendBtn, BorderLayout.EAST);
+
+        JLabel footer = new JLabel("Welcome to the lobby!", SwingConstants.CENTER);
+        footer.setForeground(Color.BLUE);
+        footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        rightPanel.add(chatLabel, BorderLayout.NORTH);
+        rightPanel.add(chatScroll, BorderLayout.CENTER);
+        rightPanel.add(inputPanel, BorderLayout.SOUTH);
 
         add(leftPanel, BorderLayout.WEST);
-        add(chatPanel, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.CENTER);
+        add(footer, BorderLayout.SOUTH);
 
         setVisible(true);
     }
 
-    // ========== BUTTON ACTIONS ==========
+    // ======= BUTTON ACTIONS =======
 
     private void inviteSelectedUser() {
         String target = userList.getSelectedValue();
         if (target == null) {
-            JOptionPane.showMessageDialog(this, "Pilih user dulu!");
+            JOptionPane.showMessageDialog(this, "Select a user to invite.");
             return;
         }
         if (target.equals(username)) {
-            JOptionPane.showMessageDialog(this, "Tidak bisa invite diri sendiri.");
+            JOptionPane.showMessageDialog(this, "Cannot invite yourself.");
             return;
         }
 
         connectionManager.sendMessage("INVITE|" + target);
-        chatArea.append("[INFO] Invite dikirim ke " + target + "\n");
+        chatArea.append("[INFO] Invite sent to " + target + "\n");
     }
 
     private void sendChat() {
@@ -90,8 +114,6 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         }
     }
 
-    // ========== LOGOUT / QUIT FEATURE ==========
-
     private void logout() {
         int confirm = JOptionPane.showConfirmDialog(
                 this,
@@ -101,67 +123,60 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-
             try {
                 connectionManager.sendMessage("QUIT");
                 connectionManager.disconnect();
             } catch (Exception ignored) {}
 
-            // kembali ke login
             LoginFrame login = new LoginFrame();
             login.setVisible(true);
-
             this.dispose();
         }
     }
 
-    // Called oleh GameFrame setelah selesai
+    // ======= GAME RETURN =======
     public void returnFromGame() {
         connectionManager.setMessageListener(this);
         this.setVisible(true);
     }
 
-    // ========== MESSAGE HANDLER ==========
+    // ======= RECEIVE MESSAGE =======
 
     @Override
     public void onMessageReceived(String message) {
-        String[] parts = message.split("\\|");
-        String cmd = parts[0];
+        String[] p = message.split("\\|");
+        String cmd = p[0];
 
         switch (cmd) {
 
             case "USER_LIST":
                 userListModel.clear();
-                if (parts.length > 1) {
-                    for (String user : parts[1].split(",")) {
-                        if (!user.isBlank())
-                            userListModel.addElement(user);
+                if (p.length > 1) {
+                    for (String u : p[1].split(",")) {
+                        if (!u.isBlank())
+                            userListModel.addElement(u);
                     }
                 }
                 break;
 
             case "CHAT_GLOBAL_FROM":
-                chatArea.append(parts[1] + ": " + parts[2] + "\n");
+                chatArea.append(p[1] + ": " + p[2] + "\n");
                 break;
 
             case "INVITE_FROM":
-                handleInvite(parts[1]);
+                handleInvite(p[1]);
                 break;
 
             case "INVITE_ACCEPTED":
-                chatArea.append("[INFO] " + parts[1] + " menerima invite kamu.\n");
+                chatArea.append("[INFO] " + p[1] + " accepted your invite.\n");
                 break;
 
             case "INVITE_DECLINED":
-                chatArea.append("[INFO] " + parts[1] + " menolak invite kamu.\n");
+                chatArea.append("[INFO] " + p[1] + " declined your invite.\n");
                 break;
 
             case "GAME_START":
-                openGame(parts);
-                break;
-
-            default:
-                // abaikan message lain
+                openGame(p);
                 break;
         }
     }
@@ -170,7 +185,7 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         int r = JOptionPane.showConfirmDialog(
                 this,
                 from + " invited you to play. Accept?",
-                "Invite",
+                "Invitation",
                 JOptionPane.YES_NO_OPTION
         );
 
@@ -181,16 +196,13 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         }
     }
 
-    private void openGame(String[] parts) {
-        String gameId = parts[1];
-        String youSymbol = parts[2].split("=")[1];
-        String opponent = parts[3].split("=")[1];
+    private void openGame(String[] p) {
+        String gameId = p[1];
+        String youSymbol = p[2].split("=")[1];
+        String opponent = p[3].split("=")[1];
 
         GameFrame gameFrame = new GameFrame(connectionManager, this, gameId, youSymbol, opponent);
-
-        // Listener pindah ke GameFrame
         connectionManager.setMessageListener(gameFrame);
-
         this.setVisible(false);
     }
 
