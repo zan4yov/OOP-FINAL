@@ -87,6 +87,7 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         add(footer, BorderLayout.SOUTH);
 
         setVisible(true);
+        connectionManager.sendMessage("REQ_USER_LIST");
     }
 
     // ======= BUTTON ACTIONS =======
@@ -119,14 +120,14 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
                 this,
                 "Are you sure you want to quit?",
                 "Quit",
-                JOptionPane.YES_NO_OPTION
-        );
+                JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 connectionManager.sendMessage("QUIT");
                 connectionManager.disconnect();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             LoginFrame login = new LoginFrame();
             login.setVisible(true);
@@ -153,7 +154,7 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
                 userListModel.clear();
                 if (p.length > 1) {
                     for (String u : p[1].split(",")) {
-                        if (!u.isBlank())
+                        if (!u.isBlank() && !u.equals(username))
                             userListModel.addElement(u);
                     }
                 }
@@ -186,8 +187,7 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
                 this,
                 from + " invited you to play. Accept?",
                 "Invitation",
-                JOptionPane.YES_NO_OPTION
-        );
+                JOptionPane.YES_NO_OPTION);
 
         if (r == JOptionPane.YES_OPTION) {
             connectionManager.sendMessage("ACCEPT_INVITE|" + from);

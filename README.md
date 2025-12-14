@@ -7,18 +7,17 @@ Java-based multiplayer Tic-Tac-Toe dengan client-server architecture, GUI berbas
 - ✅ **Client-Server Architecture** menggunakan TCP sockets
 - ✅ **Multi-threaded Server** mendukung multiple concurrent clients
 - ✅ **GUI Interface** dengan Java Swing
-- ✅ **Real-time Gameplay** dengan turn-based Tic-Tac-Toe
-- ✅ **Lobby System** dengan user list dan invitation system
-- ✅ **Chat System** - Global chat di lobby dan in-game chat
-- ✅ **Connection Management** dengan heartbeat dan auto-reconnect detection
-- ✅ **Game State Management** dengan win/draw detection
-- ✅ **Error Handling** comprehensive untuk network dan game errors
+- ✅ **Infinity Tic-Tac-Toe** - Max 3 moves per player (oldest move disappears)
+- ✅ **Lobby System** with user list (excludes self) and invitation system
+- ✅ **Chat System** - Global chat and in-game chat
+- ✅ **Connection Management** with heartbeat and auto-reconnect detection
+- ✅ **Secure Game State** with server-side validation
 
 ## 📋 Requirements
-- Java Development Kit (JDK) 8 atau lebih tinggi
-- OS: Windows, Linux, atau macOS
-- Network: LAN atau Internet connection
-- Port 8888 harus available (default, bisa diubah)
+- Java Development Kit (JDK) 8 or higher
+- OS: Windows, Linux, or macOS
+- Network: LAN or Internet connection
+- Port 8888 must be available
 
 ## 🚀 Quick Start
 
@@ -70,7 +69,7 @@ run-client.bat
 2. Enter server address (default: localhost)
 3. Enter port (default: 8888)
 4. Click "Connect"
-5. Invite other players from lobby
+5. Invite other players from lobby (you won't see yourself in the list)
 6. Enjoy the game!
 
 ## 📁 Project Structure
@@ -108,17 +107,22 @@ tictactoe/
 4. Click Connect
 
 ### Lobby
-- View all online users in the left panel
+- View all online users (except yourself)
 - Send messages in global chat
 - Select a user and click "Invite to Play"
 - Wait for invitation acceptance or invite others
 
-### Game
+### Game Rules (Infinity Tic-Tac-Toe)
 - **X always goes first** (assigned to inviter)
+- **Max 3 Moves**: Each player can have at most **3 symbols** on the board.
+- **Infinity Logic**: When you place your **4th mark**, your **1st mark (oldest)** automatically disappears!
+- **Strategy**: You must plan ahead, as your old moves will vanish.
+- **Win**: Get 3 in a row (horizontal, vertical, or diagonal).
+- **Draw**: Not applicable in Infinity mode (game continues until someone wins or surrenders).
+
+### In-Game
 - Click empty cell to place your symbol
 - Wait for your turn (indicated by status label)
-- **Win** by getting 3 in a row (horizontal, vertical, or diagonal)
-- **Draw** if board is full with no winner
 - Use in-game chat to talk with opponent
 - Click "Surrender" to give up
 - Automatically return to lobby after game ends
@@ -158,7 +162,7 @@ java -jar junit-platform-console-standalone.jar --class-path bin --scan-classpat
 ### Manual Testing Scenarios
 1. **Single Player**: Login and explore lobby
 2. **Two Players**: Login with 2 clients, invite, and play
-3. **Multiple Players**: Login with 3+ clients, test concurrent invites
+3. **Infinity Check**: Place 4th move and verify 1st move disappears
 4. **Disconnect**: Close client during game, verify opponent notification
 5. **Server Restart**: Restart server, verify client error handling
 
@@ -173,6 +177,7 @@ COMMAND|PARAM1|PARAM2|...
 
 **Client → Server:**
 - `LOGIN|username` - Login request
+- `REQ_USER_LIST` - Request fresh user list
 - `INVITE|target` - Invite player to game
 - `MOVE|gameId|row|col` - Make move
 - `CHAT_GLOBAL|message` - Send global chat
@@ -183,7 +188,8 @@ COMMAND|PARAM1|PARAM2|...
 - `USER_LIST|user1,user2,...` - Online users
 - `GAME_START|gameId|you=X|opponent=name` - Game starting
 - `BOARD_UPDATE|gameId|state` - Board state (9 chars: X, O, .)
-- `GAME_RESULT|gameId|result|reason|details` - Game ended
+- `GAME_RESULT|gameId|WINNER|username` - Game won by username
+- `GAME_RESULT|gameId|DRAW|NONE` - Game drawn (rare in infinity mode)
 - `CHAT_GLOBAL_FROM|sender|message` - Chat message
 
 See full protocol documentation in `docs/PROTOCOL.md`

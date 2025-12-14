@@ -7,7 +7,7 @@ Aplikasi multiplayer Tic-Tac-Toe berbasis client-server dengan GUI menggunakan J
 - Login dengan nickname
 - Melihat daftar pemain online
 - Mengirim invitation untuk bermain
-- Bermain Tic-Tac-Toe secara real-time
+- Bermain Infinity Tic-Tac-Toe (Max 3 moves)
 - Chat global di lobby
 - Chat in-game dengan opponent
 
@@ -93,6 +93,7 @@ COMMAND|PARAM1|PARAM2|...
 | Command | Format | Description | Example |
 |---------|--------|-------------|---------|
 | LOGIN | `LOGIN\|username` | Login request | `LOGIN\|razan` |
+| REQ_USER_LIST | `REQ_USER_LIST` | Request fresh user list | `REQ_USER_LIST` |
 | CHAT_GLOBAL | `CHAT_GLOBAL\|message` | Send global chat | `CHAT_GLOBAL\|Hello everyone` |
 | INVITE | `INVITE\|target_user` | Invite player | `INVITE\|budi` |
 | ACCEPT_INVITE | `ACCEPT_INVITE\|inviter` | Accept invitation | `ACCEPT_INVITE\|budi` |
@@ -117,7 +118,8 @@ COMMAND|PARAM1|PARAM2|...
 | GAME_START | `GAME_START\|gameId\|you=X\|opponent=name` | Game starting | `GAME_START\|GAME_123\|you=X\|opponent=budi` |
 | YOUR_TURN | `YOUR_TURN\|gameId` | Your turn notification | `YOUR_TURN\|GAME_123` |
 | BOARD_UPDATE | `BOARD_UPDATE\|gameId\|state` | Board state update | `BOARD_UPDATE\|GAME_123\|X..O..X..` |
-| GAME_RESULT | `GAME_RESULT\|gameId\|result\|reason\|details` | Game ended | `GAME_RESULT\|GAME_123\|WIN\|WIN\|You won!` |
+| GAME_RESULT | `GAME_RESULT\|gameId\|WINNER\|username` | Game won | `GAME_RESULT\|GAME_123\|WINNER\|razan` |
+| GAME_RESULT | `GAME_RESULT\|gameId\|DRAW\|NONE` | Game draw | `GAME_RESULT\|GAME_123\|DRAW\|NONE` |
 | CHAT_GAME_FROM | `CHAT_GAME_FROM\|gameId\|sender\|message` | Game chat | `CHAT_GAME_FROM\|GAME_123\|budi\|GG` |
 | PONG | `PONG` | Heartbeat response | `PONG` |
 | SERVER_SHUTDOWN | `SERVER_SHUTDOWN` | Server shutting down | `SERVER_SHUTDOWN` |
@@ -686,7 +688,7 @@ private static final String DEFAULT_PORT = "8888";
 - Player X always goes first
 - Wait sampai "Your turn!" message
 - Cannot click saat opponent's turn
-- Cannot place di occupied cell
+- **Infinite Mode**: Each player has max 3 marks. Placing 4th mark removes 1st mark.
 
 #### Game Chat (Right Panel)
 - Chat hanya dengan opponent
@@ -700,7 +702,7 @@ private static final String DEFAULT_PORT = "8888";
 
 #### Winning Conditions
 - **Win**: 3 in a row (horizontal, vertical, atau diagonal)
-- **Draw**: Board penuh, tidak ada winner
+- **Draw**: Not applicable in Infinity mode (game continues until win or surrender)
 - **Surrender**: Opponent surrenders
 - **Disconnect**: Opponent disconnects (you win)
 

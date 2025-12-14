@@ -18,7 +18,7 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
     private JTextField chatInput = new JTextField();
 
     public GameFrame(ConnectionManager cm, LobbyFrame lobby,
-                     String gameId, String youSymbol, String opponentName) {
+            String gameId, String youSymbol, String opponentName) {
         this.cm = cm;
         this.lobby = lobby;
         this.gameId = gameId;
@@ -90,25 +90,19 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
     }
 
     private void handleCellClick(int idx) {
-    cm.sendMessage("GAME_MOVE|" + gameId + "|" + idx);
+        cm.sendMessage("GAME_MOVE|" + gameId + "|" + idx);
 
-    // Setelah mengambil langkah → harus menunggu
-    turnLabel.setText("Wait your turn...");
-    turnLabel.setForeground(Color.RED.darker());
+        // Setelah mengambil langkah → harus menunggu
+        turnLabel.setText("Wait your turn...");
+        turnLabel.setForeground(Color.RED.darker());
 
-    enableBoard(false);
-}
-
-    private void enableBoard(boolean enable) {
-        for (JButton btn : cells) {
-            if (btn.getText().isEmpty())
-                btn.setEnabled(enable);
-        }
+        enableBoard(false);
     }
 
     private void sendGameChat() {
         String msg = chatInput.getText().trim();
-        if (msg.isEmpty()) return;
+        if (msg.isEmpty())
+            return;
 
         cm.sendMessage("GAME_CHAT|" + gameId + "|" + msg);
         chatInput.setText("");
@@ -153,7 +147,31 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
             char c = board.charAt(i);
             if (c != '-') {
                 cells[i].setText(String.valueOf(c));
-                cells[i].setEnabled(false);
+                cells[i].setEnabled(false); // Occupied cells always disabled
+            } else {
+                cells[i].setText(""); // Clear text if it became empty
+                // Note: enableBoard() will be called when YOUR_TURN arrives
+                // or if we need to refresh state.
+                // But generally, buttons are enabled via enableBoard().
+                // However, we should ensure that if it IS our turn, empty cells are enabled.
+            }
+        }
+
+        // If it is currently my turn (label is green/My Turn),
+        // I need to make sure empty cells are clickable.
+        if (turnLabel.getText().startsWith("Your turn")) {
+            enableBoard(true);
+        }
+    }
+
+    private void enableBoard(boolean enable) {
+        for (JButton btn : cells) {
+            String text = btn.getText();
+            // Only enable empty cells
+            if (text == null || text.trim().isEmpty()) {
+                btn.setEnabled(enable);
+            } else {
+                btn.setEnabled(false);
             }
         }
     }
@@ -165,11 +183,13 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
         String msg;
         if (type.equals("DRAW")) {
             msg = "Game berakhir seri.";
-        } else if (type.equals("WIN")) {
+        } else if (type.equals("WINNER")) {
             String winner = parts[3];
-            msg = winner.equals(youSymbol) || winner.equals("YOU") ? "Kamu menang!" : "Kamu kalah!";
-        } else if (type.equals("LOSE")) {
-            msg = "Kamu kalah.";
+            if (winner.equals(opponentName)) {
+                msg = "Kamu kalah.";
+            } else {
+                msg = "Kamu menang!";
+            }
         } else {
             msg = "Game selesai.";
         }

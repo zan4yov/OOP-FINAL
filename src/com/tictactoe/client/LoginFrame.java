@@ -33,27 +33,32 @@ public class LoginFrame extends JFrame implements ConnectionManager.MessageListe
         JLabel title = new JLabel("Tic-Tac-Toe", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 20));
 
-        c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 2;
         panel.add(title, c);
 
         c.gridwidth = 1;
 
         // Username
-        c.gridy = 1; c.gridx = 0;
+        c.gridy = 1;
+        c.gridx = 0;
         panel.add(new JLabel("Username"), c);
-        usernameField = new JTextField("razan");
+        usernameField = new JTextField("");
         c.gridx = 1;
         panel.add(usernameField, c);
 
         // Host
-        c.gridy = 2; c.gridx = 0;
+        c.gridy = 2;
+        c.gridx = 0;
         panel.add(new JLabel("Server"), c);
         hostField = new JTextField("localhost");
         c.gridx = 1;
         panel.add(hostField, c);
 
         // Port
-        c.gridy = 3; c.gridx = 0;
+        c.gridy = 3;
+        c.gridx = 0;
         panel.add(new JLabel("Port"), c);
         portField = new JTextField("8888");
         c.gridx = 1;
@@ -63,7 +68,9 @@ public class LoginFrame extends JFrame implements ConnectionManager.MessageListe
         connectButton = new JButton("Connect & Login");
         connectButton.addActionListener(e -> doLogin());
 
-        c.gridy = 4; c.gridx = 0; c.gridwidth = 2;
+        c.gridy = 4;
+        c.gridx = 0;
+        c.gridwidth = 2;
         panel.add(connectButton, c);
 
         setContentPane(panel);

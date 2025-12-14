@@ -23,7 +23,7 @@ public class ClientHandler implements Runnable {
     public void run() {
         try {
             out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-            in  = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             String line;
             while (running && (line = in.readLine()) != null) {
@@ -96,6 +96,10 @@ public class ClientHandler implements Runnable {
                 sendMessage("PONG");
                 break;
 
+            case "REQ_USER_LIST":
+                serverState.broadcastUserList();
+                break;
+
             case "QUIT":
                 running = false;
                 disconnect();
@@ -141,7 +145,8 @@ public class ClientHandler implements Runnable {
         ClientHandler inviter = serverState.getUser(inviterName);
         ClientHandler invitee = serverState.getUser(username);
 
-        if (inviter == null || invitee == null) return;
+        if (inviter == null || invitee == null)
+            return;
 
         // Buat game baru
         GameRoom game = serverState.createGame(inviterName, username);
@@ -174,7 +179,7 @@ public class ClientHandler implements Runnable {
 
     private void handleGameChat(String[] parts) {
         String gameId = parts[1];
-        String text   = parts[2];
+        String text = parts[2];
 
         GameRoom game = serverState.getGame(gameId);
         if (game != null) {
@@ -184,7 +189,8 @@ public class ClientHandler implements Runnable {
 
     private void handleSurrender() {
         GameRoom game = serverState.findGameByPlayer(username);
-        if (game == null) return;
+        if (game == null)
+            return;
 
         String p1 = game.getPlayer1();
         String p2 = game.getPlayer2();
@@ -209,11 +215,15 @@ public class ClientHandler implements Runnable {
                 serverState.broadcastUserList();
             }
 
-            if (in != null)  in.close();
-            if (out != null) out.close();
-            if (socket != null && !socket.isClosed()) socket.close();
+            if (in != null)
+                in.close();
+            if (out != null)
+                out.close();
+            if (socket != null && !socket.isClosed())
+                socket.close();
 
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 
     // ================= UTIL =================
