@@ -242,7 +242,8 @@ This is an educational project. Free to use for learning purposes.
 ## 📧 Contact & Support
 
 For bugs, questions, or suggestions:
-- Open an issue on GitHuh
+- Open an issue on GitHub
 ---
+
 
 **Happy Gaming! 🎮**
