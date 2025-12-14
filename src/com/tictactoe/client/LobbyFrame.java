@@ -2,6 +2,9 @@ package com.tictactoe.client;
 
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.border.EmptyBorder;
+import com.tictactoe.client.UIStyles.RoundedButton;
+import com.tictactoe.client.UIStyles.RoundedPanel;
 
 public class LobbyFrame extends JFrame implements ConnectionManager.MessageListener {
 
@@ -18,6 +21,7 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
         this.connectionManager = cm;
         this.username = username;
 
+        UIStyles.install();
         cm.setMessageListener(this);
 
         initUI();
@@ -26,64 +30,70 @@ public class LobbyFrame extends JFrame implements ConnectionManager.MessageListe
     private void initUI() {
         setTitle("Tic-Tac-Toe Lobby - " + username);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1000, 650);
+        setSize(1000, 660);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(12, 12));
 
-        // ===== LEFT PANEL =====
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.setPreferredSize(new Dimension(250, 0));
+        // LEFT: user list card
+        RoundedPanel leftCard = new RoundedPanel();
+        leftCard.setLayout(new BorderLayout(8, 8));
+        leftCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+        leftCard.setPreferredSize(new Dimension(260, 0));
 
         JLabel onlineLabel = new JLabel("Online Users", SwingConstants.CENTER);
-        onlineLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-        onlineLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        onlineLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        onlineLabel.setForeground(UIStyles.TEXT);
 
         JScrollPane userScroll = new JScrollPane(userList);
+        userList.setBackground(new Color(44, 42, 60));
+        userList.setForeground(UIStyles.TEXT);
 
-        JButton inviteBtn = new JButton("Invite to Play");
+        JPanel leftButtons = new JPanel(new GridLayout(2, 1, 8, 8));
+        leftButtons.setOpaque(false);
+        RoundedButton inviteBtn = new RoundedButton("Invite to Play");
         inviteBtn.addActionListener(e -> inviteSelectedUser());
-
-        JButton quitBtn = new JButton("Quit");
+        RoundedButton quitBtn = new RoundedButton("Quit");
         quitBtn.addActionListener(e -> logout());
+        leftButtons.add(inviteBtn);
+        leftButtons.add(quitBtn);
 
-        JPanel bottomButtons = new JPanel(new GridLayout(2, 1, 6, 6));
-        bottomButtons.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        bottomButtons.add(inviteBtn);
-        bottomButtons.add(quitBtn);
+        leftCard.add(onlineLabel, BorderLayout.NORTH);
+        leftCard.add(userScroll, BorderLayout.CENTER);
+        leftCard.add(leftButtons, BorderLayout.SOUTH);
 
-        leftPanel.add(onlineLabel, BorderLayout.NORTH);
-        leftPanel.add(userScroll, BorderLayout.CENTER);
-        leftPanel.add(bottomButtons, BorderLayout.SOUTH);
-
-        // ===== RIGHT PANEL =====
-        JPanel rightPanel = new JPanel(new BorderLayout());
+        // CENTER: chat card
+        RoundedPanel chatCard = new RoundedPanel();
+        chatCard.setLayout(new BorderLayout(8, 8));
+        chatCard.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         JLabel chatLabel = new JLabel("Global Chat", SwingConstants.CENTER);
-        chatLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-        chatLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        chatLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        chatLabel.setForeground(UIStyles.TEXT);
 
         chatArea.setEditable(false);
+        chatArea.setBackground(new Color(40, 38, 54));
+        chatArea.setForeground(UIStyles.TEXT);
         JScrollPane chatScroll = new JScrollPane(chatArea);
 
         chatInput.addActionListener(e -> sendChat());
-        JButton sendBtn = new JButton("Send");
+        RoundedButton sendBtn = new RoundedButton("Send");
         sendBtn.addActionListener(e -> sendChat());
 
-        JPanel inputPanel = new JPanel(new BorderLayout(6, 0));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel inputPanel = new JPanel(new BorderLayout(8, 0));
+        inputPanel.setOpaque(false);
         inputPanel.add(chatInput, BorderLayout.CENTER);
         inputPanel.add(sendBtn, BorderLayout.EAST);
 
+        chatCard.add(chatLabel, BorderLayout.NORTH);
+        chatCard.add(chatScroll, BorderLayout.CENTER);
+        chatCard.add(inputPanel, BorderLayout.SOUTH);
+
+        // Footer
         JLabel footer = new JLabel("Welcome to the lobby!", SwingConstants.CENTER);
-        footer.setForeground(Color.BLUE);
-        footer.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        footer.setForeground(UIStyles.PRIMARY);
 
-        rightPanel.add(chatLabel, BorderLayout.NORTH);
-        rightPanel.add(chatScroll, BorderLayout.CENTER);
-        rightPanel.add(inputPanel, BorderLayout.SOUTH);
-
-        add(leftPanel, BorderLayout.WEST);
-        add(rightPanel, BorderLayout.CENTER);
+        add(leftCard, BorderLayout.WEST);
+        add(chatCard, BorderLayout.CENTER);
         add(footer, BorderLayout.SOUTH);
 
         setVisible(true);

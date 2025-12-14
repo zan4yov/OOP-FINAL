@@ -2,6 +2,9 @@ package com.tictactoe.client;
 
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.border.EmptyBorder;
+import com.tictactoe.client.UIStyles.RoundedButton;
+import com.tictactoe.client.UIStyles.RoundedPanel;
 
 public class LoginFrame extends JFrame implements ConnectionManager.MessageListener {
 
@@ -13,25 +16,27 @@ public class LoginFrame extends JFrame implements ConnectionManager.MessageListe
     private ConnectionManager connectionManager;
 
     public LoginFrame() {
+        UIStyles.install();
         setTitle("Tic-Tac-Toe Login");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(380, 240);
+        setSize(420, 300);
         setLocationRelativeTo(null);
 
         initUI();
     }
 
     private void initUI() {
-        JPanel panel = new JPanel();
+        RoundedPanel panel = new RoundedPanel();
         panel.setLayout(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        panel.setBorder(new EmptyBorder(18, 18, 18, 18));
 
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(4, 4, 4, 4);
+        c.insets = new Insets(8, 8, 8, 8);
         c.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel title = new JLabel("Tic-Tac-Toe", SwingConstants.CENTER);
-        title.setFont(new Font("SansSerif", Font.BOLD, 20));
+        title.setFont(new Font("SansSerif", Font.BOLD, 26));
+        title.setForeground(UIStyles.TEXT);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -65,7 +70,7 @@ public class LoginFrame extends JFrame implements ConnectionManager.MessageListe
         panel.add(portField, c);
 
         // Button
-        connectButton = new JButton("Connect & Login");
+        connectButton = new RoundedButton("Connect & Login");
         connectButton.addActionListener(e -> doLogin());
 
         c.gridy = 4;

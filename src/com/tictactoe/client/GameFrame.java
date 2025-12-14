@@ -2,6 +2,9 @@ package com.tictactoe.client;
 
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.border.EmptyBorder;
+import com.tictactoe.client.UIStyles.RoundedButton;
+import com.tictactoe.client.UIStyles.RoundedPanel;
 
 public class GameFrame extends JFrame implements ConnectionManager.MessageListener {
 
@@ -25,6 +28,7 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
         this.youSymbol = youSymbol;
         this.opponentName = opponentName;
 
+        UIStyles.install();
         initUI();
 
         // jadikan GameFrame sebagai listener aktif
@@ -34,30 +38,39 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
     private void initUI() {
         setTitle("Game vs " + opponentName);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(900, 650);
+        setSize(920, 660);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(12, 12));
 
-        // TOP: status
-        JPanel topPanel = new JPanel(new GridLayout(2, 1));
+        // TOP: status in a rounded panel
+        RoundedPanel topPanel = new RoundedPanel();
+        topPanel.setLayout(new BorderLayout());
+        topPanel.setBorder(new EmptyBorder(12, 12, 12, 12));
+
         turnLabel = new JLabel("Waiting for your turn...", SwingConstants.CENTER);
         turnLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        turnLabel.setForeground(UIStyles.TEXT);
 
         JLabel opponentLabel = new JLabel("Opponent: " + opponentName, SwingConstants.CENTER);
         opponentLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        opponentLabel.setForeground(UIStyles.TEXT);
 
-        topPanel.add(turnLabel);
-        topPanel.add(opponentLabel);
+        topPanel.add(turnLabel, BorderLayout.CENTER);
+        topPanel.add(opponentLabel, BorderLayout.SOUTH);
 
         add(topPanel, BorderLayout.NORTH);
 
         // CENTER: board
-        JPanel boardPanel = new JPanel(new GridLayout(3, 3, 8, 8));
-        boardPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        JPanel boardWrapper = new JPanel(new GridBagLayout());
+        boardWrapper.setOpaque(false);
+        JPanel boardPanel = new JPanel(new GridLayout(3, 3, 12, 12));
+        boardPanel.setOpaque(false);
+        boardPanel.setBorder(new EmptyBorder(18, 18, 18, 18));
 
         for (int i = 0; i < 9; i++) {
-            JButton btn = new JButton("");
-            btn.setFont(new Font("SansSerif", Font.BOLD, 48));
+            RoundedButton btn = new RoundedButton("");
+            btn.setFont(new Font("SansSerif", Font.BOLD, 42));
+            btn.setPreferredSize(new Dimension(120, 120));
             btn.setMargin(new Insets(0, 0, 0, 0));
             btn.setFocusable(false);
 
@@ -69,22 +82,30 @@ public class GameFrame extends JFrame implements ConnectionManager.MessageListen
             boardPanel.add(btn);
         }
 
-        add(boardPanel, BorderLayout.CENTER);
+        boardWrapper.add(boardPanel);
+        add(boardWrapper, BorderLayout.CENTER);
 
-        // RIGHT: chat in-game
+        // RIGHT: chat in-game in rounded card
         chatArea.setEditable(false);
+        chatArea.setForeground(UIStyles.TEXT);
+        chatArea.setBackground(new Color(40, 38, 54));
         JScrollPane chatScroll = new JScrollPane(chatArea);
 
         chatInput.addActionListener(e -> sendGameChat());
 
-        JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.add(new JLabel("Game Chat", SwingConstants.CENTER), BorderLayout.NORTH);
-        chatPanel.add(chatScroll, BorderLayout.CENTER);
-        chatPanel.add(chatInput, BorderLayout.SOUTH);
+        RoundedPanel chatCard = new RoundedPanel();
+        chatCard.setLayout(new BorderLayout(8, 8));
+        chatCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+        JLabel chatTitle = new JLabel("Game Chat", SwingConstants.CENTER);
+        chatTitle.setForeground(UIStyles.TEXT);
+        chatTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        chatPanel.setPreferredSize(new Dimension(260, 0));
+        chatCard.add(chatTitle, BorderLayout.NORTH);
+        chatCard.add(chatScroll, BorderLayout.CENTER);
+        chatCard.add(chatInput, BorderLayout.SOUTH);
 
-        add(chatPanel, BorderLayout.EAST);
+        chatCard.setPreferredSize(new Dimension(300, 0));
+        add(chatCard, BorderLayout.EAST);
 
         setVisible(true);
     }
